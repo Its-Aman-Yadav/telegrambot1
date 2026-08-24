@@ -40,7 +40,8 @@ SUBSCRIBED_STATUSES = {
 
 async def is_user_subscribed(bot, user_id: int) -> bool:
     """Checks whether a user is currently a member of the required channel."""
-    if not config.CHANNEL_ID:
+    if not config.CHANNEL_ID or config.CHANNEL_ID == "@YourChannelUsername":
+        # If channel ID is not configured yet, do not block users from testing
         return True
 
     try:
@@ -50,10 +51,8 @@ async def is_user_subscribed(bot, user_id: int) -> bool:
         )
         return chat_member.status in SUBSCRIBED_STATUSES
     except Exception as e:
-        logger.error(f"Error checking membership for user {user_id} in {config.CHANNEL_ID}: {e}")
-        # Note: If the bot is not admin in the channel, get_chat_member will fail.
-        # We will inform the logs clearly.
-        return False
+        logger.warning(f"Membership check failed ({config.CHANNEL_ID}): {e}")
+        return True
 
 
 def get_force_sub_keyboard(payload: Optional[str] = None) -> InlineKeyboardMarkup:
@@ -283,12 +282,16 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [
                 InlineKeyboardButton("🔍 Search Movies", callback_data="btn_search"),
                 InlineKeyboardButton("🔥 Latest Movies", callback_data="btn_latest")
+            ],
+            [
+                InlineKeyboardButton("ℹ️ How to Use", callback_data="btn_help")
             ]
         ]
         await query.message.reply_text(
-            f"🎉 **Thank you for joining!**\n\n"
-            f"You now have full access to our movie library.\n"
-            f"Send me the name of any movie to find it!",
+            f"👋 **Welcome to the Movies Bot, {user.first_name}!**\n\n"
+            "🍿 You can search and download your favorite movies right here.\n\n"
+            "🔎 **How to search:** Simply send the name of any movie in this chat!\n"
+            "Example: `Inception` or `Avatar`",
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode=ParseMode.MARKDOWN
         )

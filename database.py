@@ -38,6 +38,22 @@ def init_db():
         )
     """)
 
+    # Seed sample starter movies if catalog is empty
+    cursor.execute("SELECT COUNT(*) as cnt FROM movies")
+    if cursor.fetchone()["cnt"] == 0:
+        starter_movies = [
+            ("spiderman_brand_new_day", "Spider-Man: Brand New Day (HD 4K)", "Action / Adventure / Sci-Fi | Multi-Audio [Hindi + English]", "https://t.me/+UfCNSsEA-EVkYjg9"),
+            ("spiderman_hd_4k", "Spider-Man: No Way Home (2021) 4K", "Action / Sci-Fi | Dual Audio [Hindi DD 5.1 + English]", "https://t.me/+UfCNSsEA-EVkYjg9"),
+            ("inception_2010", "Inception (2010) 1080p Ultra HD", "Mind-bending sci-fi heist thriller by Christopher Nolan", "https://t.me/+UfCNSsEA-EVkYjg9"),
+            ("avatar_2022", "Avatar: The Way of Water (2022) 4K", "Epic sci-fi action film directed by James Cameron", "https://t.me/+UfCNSsEA-EVkYjg9"),
+            ("interstellar_2014", "Interstellar (2014) IMAX Edition", "Space adventure & sci-fi masterpiece by Christopher Nolan", "https://t.me/+UfCNSsEA-EVkYjg9")
+        ]
+        for code, title, desc, url in starter_movies:
+            cursor.execute("""
+                INSERT OR IGNORE INTO movies (movie_code, title, description, download_url)
+                VALUES (?, ?, ?, ?)
+            """, (code, title, desc, url))
+
     conn.commit()
     conn.close()
 
